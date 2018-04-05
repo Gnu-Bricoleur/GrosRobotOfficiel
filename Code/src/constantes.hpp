@@ -1,2 +1,2 @@
-#define BLANC 500
-#define NOIR 850
+#define BLANC 100
+#define NOIR 100
