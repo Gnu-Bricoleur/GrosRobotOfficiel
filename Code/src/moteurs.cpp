@@ -59,3 +59,14 @@ void moteurStop()
     analogWrite(enB, 0);
 
 }
+
+
+void initMoteurs()
+{
+  pinMode(enA, OUTPUT);
+  pinMode(enB, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  pinMode(in3, OUTPUT);
+  pinMode(in4, OUTPUT);
+}

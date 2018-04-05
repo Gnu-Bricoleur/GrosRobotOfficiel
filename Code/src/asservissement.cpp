@@ -1,5 +1,9 @@
+// inspiration : http://rco.fr.nf/index.php/2016/07/03/deplacement-dun-robot/
+
 #include <Arduino.h>
 #include "asservissement.hpp"
+#include "moteurs.hpp"
+
 
 float codeuseDroite = 0;
 float codeuseGauche = 0;
@@ -9,8 +13,11 @@ const double coeffGLong = 0.12;
 const double coeffDLong = 0.12;
 
 //Constantes permettant la transformation tic / degrés
-const double coeffGAngl = 0.0001;
-const double coeffDAngl = 0.0001;
+const double coeffGAngl = 0.0;
+const double coeffDAngl = 0.0;
+
+
+
 
 
 
@@ -27,8 +34,8 @@ double xR = 0.;
 double yR = 0.;
 
 //Variables permettant de stocker la position de la cible du robot
-double xC = 1000;
-double yC = 1000;
+double xC = 0;
+double yC = 0;
 
 //Variables allant contenir les delta position et angle
 double dDist = 0.;
@@ -47,9 +54,26 @@ int signe = 1;
 double distanceCible = 0.;
 
 
+//Variables parametrant l'asservissement en angle du robot
+double coeffP = 0.4;
+double coeffD = 0.1;
+double coeffI = 0.000001;
 
 
+//Variables utilisées pour asservir le robot
+double erreurAngle = 0.;
+double erreurPre = 0.;
+double  deltaErreur = 0.;
 
+//Variables représentant les commandes à envoyer aux moteurs
+int cmdG = 0;//Commande gauche
+int cmdD = 0; //commande droite
+
+
+double deltaErreurPasAngle = 0;
+double ErreurPasAnglePre  =0;
+
+double sommeErreur = 0;
 
 void assert()
 {
@@ -93,6 +117,8 @@ if (dDist != 0)
 {
   Serial.print("Distance : ");
   Serial.println(dDist);
+  Serial.print("Distance cible: ");
+  Serial.println(distanceCible);
   Serial.print("Angle : ");
   Serial.println(dAngl);
   Serial.print("XR : ");
@@ -137,10 +163,82 @@ void recupCodeuse()
     // Serial.print(" ; ");
     // Serial.println(codeuseGauche);
 
-
+    deplaceRobot();
     //delay(1000);
 
 }
+
+void deplaceRobot()
+{
+  if (xC-xR > 0)
+  {
+    distanceCible = distanceCible*(-1);
+  }
+
+  deltaErreurPasAngle = distanceCible - ErreurPasAnglePre;
+
+  ErreurPasAnglePre = deltaErreurPasAngle;
+
+  sommeErreur += distanceCible;
+
+	//On détermine les commandes à envoyer aux moteurs
+	cmdD = distanceCible*coeffP + coeffD*deltaErreurPasAngle + coeffI*sommeErreur;
+
+	if(cmdD>255)
+	{
+	  	cmdD = 255;
+	}
+  if(cmdD< -255)
+	{
+	  	cmdD = -255;
+	}
+	cmdG = cmdD;
+
+	// //Calcul de l'erreur
+	// erreurAngle =  consigneOrientation - orientation;
+  //
+	// //Calcul de la différence entre l'erreur au coup précédent et l'erreur actuelle.
+	// deltaErreur = erreurAngle - erreurPre;
+  //
+	// //Mise en mémoire de l'erreur actuelle
+	// erreurPre  = erreurAngle;
+  //
+	// //Calcul de la valeur à envoyer aux moteurs pour tourner
+	// int deltaCommande = coeffP*erreurAngle + coeffD * deltaErreur;
+  //
+	// cmdG += deltaCommande;
+	// cmdD -= deltaCommande;
+
+	if(cmdD>70)
+	{
+	  	cmdD = 70;
+	}else if(cmdD < -70)
+	{
+	  	cmdD = -70;
+	}
+
+	if(cmdG>70)
+	{
+	  	cmdG = 70;
+	}else if(cmdG < -70)
+	{
+	  	cmdG = -70;
+	}
+
+
+  // Serial.println(cmdD);
+  // Serial.println(cmdG);
+
+  moteurDroit(cmdD);
+  moteurGauche(cmdG);
+
+
+}
+
+
+
+
+
 
 
 void resetCodeuse()

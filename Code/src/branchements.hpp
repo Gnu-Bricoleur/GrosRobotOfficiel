@@ -1,9 +1,9 @@
 
 
 // Moteurs
-#define EN_A 10
-#define IN_1 9
-#define IN_2 8
+#define EN_A 13
+#define IN_1 12
+#define IN_2 11
 
 #define EN_B 5
 #define IN_3 7

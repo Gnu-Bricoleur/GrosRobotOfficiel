@@ -9,8 +9,11 @@
 #include "asservissement.hpp"
 
 
-
-
+/*
+     .--._____,
+  .-='=='==-, "
+ (O_o_o_o_o_O)
+*/
 
 void setup()
 {
@@ -18,17 +21,25 @@ void setup()
     //init();
     Serial.begin(9600);
     Serial1.begin(9600);
-    Serial.println("#############################################################");
-    Serial.println("                                 Salut");
-    Serial.println("#############################################################");
+    Serial.println("#################################################################################");
+    Serial.println("                                  Salut, Oh un char ascii ;-) ");
+    Serial.println("                                   .--._____,   ");
+    Serial.println("                                .-='=='==-, `   ");
+    Serial.println("                           .   (O_o_o_o_o_O)     /");
+    Serial.println("                            '''''''''''''''''''''    ");
+    Serial.println("##################################################################################");
+
     resetCodeuse();
-    FlexiTimer2::set(1000, assert); // 500ms period
+    FlexiTimer2::set(70, assert); // 500ms period
     FlexiTimer2::start();
-    //initMoteurs();
+    initMoteurs();
     //assertInit();
 }
 
 void loop()
 {
+  //moteurDroit(100);
+  //moteurGauche(-254);
+
 
 }
