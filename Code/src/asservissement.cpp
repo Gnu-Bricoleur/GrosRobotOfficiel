@@ -13,8 +13,8 @@ const double coeffGLong = 0.12;
 const double coeffDLong = 0.12;
 
 //Constantes permettant la transformation tic / degrés
-const double coeffGAngl = 0.0;
-const double coeffDAngl = 0.0;
+const double coeffGAngl = 0.10;
+const double coeffDAngl = 0.10;
 
 
 
@@ -55,9 +55,13 @@ double distanceCible = 0.;
 
 
 //Variables parametrant l'asservissement en angle du robot
-double coeffP = 0.4;
-double coeffD = 0.1;
-double coeffI = 0.000001;
+double coeffP = 0;//0.4;
+double coeffD = 0;//0.1;
+double coeffI = 0;//0.000001;
+
+double coeffProt = 0.4;
+double coeffDrot = 0.1;
+double coeffIrot = 0.000001;
 
 
 //Variables utilisées pour asservir le robot
@@ -184,45 +188,45 @@ void deplaceRobot()
 	//On détermine les commandes à envoyer aux moteurs
 	cmdD = distanceCible*coeffP + coeffD*deltaErreurPasAngle + coeffI*sommeErreur;
 
-	if(cmdD>255)
-	{
-	  	cmdD = 255;
-	}
-  if(cmdD< -255)
-	{
-	  	cmdD = -255;
-	}
-	cmdG = cmdD;
-
-	// //Calcul de l'erreur
-	// erreurAngle =  consigneOrientation - orientation;
-  //
-	// //Calcul de la différence entre l'erreur au coup précédent et l'erreur actuelle.
-	// deltaErreur = erreurAngle - erreurPre;
-  //
-	// //Mise en mémoire de l'erreur actuelle
-	// erreurPre  = erreurAngle;
-  //
-	// //Calcul de la valeur à envoyer aux moteurs pour tourner
-	// int deltaCommande = coeffP*erreurAngle + coeffD * deltaErreur;
-  //
-	// cmdG += deltaCommande;
-	// cmdD -= deltaCommande;
-
 	if(cmdD>70)
 	{
 	  	cmdD = 70;
-	}else if(cmdD < -70)
+	}
+  if(cmdD< -70)
 	{
 	  	cmdD = -70;
 	}
+	cmdG = cmdD;
 
-	if(cmdG>70)
+	//Calcul de l'erreur
+	erreurAngle =  consigneOrientation - orientation;
+
+	//Calcul de la différence entre l'erreur au coup précédent et l'erreur actuelle.
+	deltaErreur = erreurAngle - erreurPre;
+
+	//Mise en mémoire de l'erreur actuelle
+	erreurPre  = erreurAngle;
+
+	//Calcul de la valeur à envoyer aux moteurs pour tourner
+	int deltaCommande = coeffProt*erreurAngle + coeffDrot * deltaErreur;
+
+	cmdG += deltaCommande;
+	cmdD -= deltaCommande;
+
+	if(cmdD>100)
 	{
-	  	cmdG = 70;
-	}else if(cmdG < -70)
+	  	cmdD = 100;
+	}else if(cmdD < -100)
 	{
-	  	cmdG = -70;
+	  	cmdD = -100;
+	}
+
+	if(cmdG>100)
+	{
+	  	cmdG = 100;
+	}else if(cmdG < -100)
+	{
+	  	cmdG = -100;
 	}
 
 
