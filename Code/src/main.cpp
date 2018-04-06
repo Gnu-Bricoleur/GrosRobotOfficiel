@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <FlexiTimer2.h>
+#include <FlexiTimer2.h>//rend inutilisable les pin 9 et 10 l'arduino mega
 //#include "main.hpp"
 //#include "assertvitesse.hpp"
 #include "moteurs.hpp"
@@ -30,7 +30,7 @@ void setup()
     Serial.println("##################################################################################");
 
     resetCodeuse();
-    FlexiTimer2::set(70, assert); // 500ms period
+    FlexiTimer2::set(30, assert); // 500ms period
     FlexiTimer2::start();
     initMoteurs();
     //assertInit();
