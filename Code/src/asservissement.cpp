@@ -36,7 +36,7 @@ double xR = 0.;
 double yR = 0.;
 
 //Variables permettant de stocker la position de la cible du robot
-double xC = 0;
+double xC = 20;
 double yC = 0;
 
 //Variables allant contenir les delta position et angle
@@ -89,68 +89,75 @@ double sommeErreur = 0;
 
 void assert()
 {
+  // Pour tests frequence
   // unsigned long debut = millis();
+
   recupCodeuse();
-  //Serial.println(codeuseDroite);
   comptD = codeuseDroite;
   comptG = codeuseGauche;
 
+Serial.println(codeuseGauche);
+
+
+  // supprimer mvt parasite/vibratipons
   // if ( abs(comptD) < 5 && abs(comptG) < 5)
   // {
   //   comptD = 0;
   //   comptG = 0;
   // }
 
+  //calcul deplacement entre deux mvt codeuses
   dDist = (coeffGLong*comptG + coeffDLong*comptD)/2.;
 	dAngl = coeffDAngl*comptD - coeffGAngl*comptG;
 
 
 
-  dAngl = 0; //ATTENTION, A VIRER
+  //dAngl = 0; //ATTENTION, A VIRER
 
 
 
 	//Actualisation de la position du robot en xy et en orientation
-	xR += dDist*sin(dAngl);
-	yR += dDist*cos(dAngl);
+	xR += dDist*cos(dAngl);
+	yR += dDist*sin(dAngl);
 	orientation += dAngl;
 
 	//On calcule la distance séparant le robot de sa cible
 	distanceCible = sqrt((xC-xR)*(xC-xR)+(yC-yR)*(yC-yR));
 
-	//On regarde si la cible est à gauche ou à droite du robot
-	if(xR > xC)
-	{
-		signe = -1;
-	}else
-	{
-		signe = 1;
-	}
 
 	//On calcule l'angle entre le robot et la cible
 	consigneOrientation = signe * acos((xC-xR)/((xC-xR)*(xC-xR)*(yC-yR)*(yC-yR)));
 
-  resetCodeuse();
+//  resetCodeuse();
   deplaceRobot();
 
 
 
-if (dDist != 0)
-{
-  Serial.print("Distance : ");
-  Serial.println(dDist);
-  Serial.print("Distance cible: ");
-  Serial.println(distanceCible);
-  Serial.print("Angle : ");
-  Serial.println(dAngl);
+// if (dDist != 0)
+// {
+//   Serial.print("sommeErreur : ");
+//   Serial.println(sommeErreur);
+//   Serial.print("Distance : ");
+//   Serial.println(dDist);
+//   Serial.print("Distance cible: ");
+//   Serial.println(distanceCible);
+//   Serial.print("Angle : ");
+//   Serial.println(dAngl);
+//   Serial.print("XR : ");
+//   Serial.println(xR);
+//   Serial.print("XY : ");
+//   Serial.println(yR);
+//   Serial.print("Angle : ");
+//   Serial.println(dAngl);
+//   Serial.println("-------------------------------------");
+// }
+
   Serial.print("XR : ");
   Serial.println(xR);
   Serial.print("XY : ");
   Serial.println(yR);
-  Serial.print("Angle : ");
-  Serial.println(dAngl);
-  Serial.println("-------------------------------------");
-}
+
+
 
 
   // unsigned long fin = millis();
@@ -169,58 +176,19 @@ void deplaceRobot()
   }
 
   deltaErreurPasAngle = distanceCible - ErreurPasAnglePre;
-
   ErreurPasAnglePre = deltaErreurPasAngle;
-
   sommeErreur += distanceCible;
-
 	//On détermine les commandes à envoyer aux moteurs
+  // double maxI = coeffI*sommeErreur;
+  // if (abs(maxI)>40)
+  // {
+  //   maxI = 40 * maxI/abs(maxI);
+  // }
 	cmdD = distanceCible*coeffP + coeffD*deltaErreurPasAngle + coeffI*sommeErreur;
 
-	if(cmdD>moteurMax)
-	{
-	  	cmdD = moteurMax;
-	}
-  if(cmdD< -moteurMax)
-	{
-	  	cmdD = -moteurMax;
-	}
+
 	cmdG = cmdD;
 
-	//Calcul de l'erreur
-	erreurAngle =  consigneOrientation - orientation;
-
-	//Calcul de la différence entre l'erreur au coup précédent et l'erreur actuelle.
-	deltaErreur = erreurAngle - erreurPre;
-
-	//Mise en mémoire de l'erreur actuelle
-	erreurPre  = erreurAngle;
-
-	//Calcul de la valeur à envoyer aux moteurs pour tourner
-	int deltaCommande = coeffProt*erreurAngle + coeffDrot * deltaErreur;
-
-	cmdG += deltaCommande;
-	cmdD -= deltaCommande;
-
-	if(cmdD>moteurMax)
-	{
-	  	cmdD = moteurMax;
-	}else if(cmdD < -moteurMax)
-	{
-	  	cmdD = -moteurMax;
-	}
-
-	if(cmdG>moteurMax)
-	{
-	  	cmdG = moteurMax;
-	}else if(cmdG < -moteurMax)
-	{
-	  	cmdG = -moteurMax;
-	}
-
-
-  // Serial.println(cmdD);
-  // Serial.println(cmdG);
 
   moteurDroit(cmdD);
   moteurGauche(cmdG);
