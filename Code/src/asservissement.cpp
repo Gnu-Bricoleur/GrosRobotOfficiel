@@ -9,14 +9,15 @@ float codeuseDroite = 0;
 float codeuseGauche = 0;
 
 //Constantes permettant la transformation tic / millimètre
-const double coeffGLong = 0.12271846303;
 //40mm de diametere=>40*PImm de distance par 1024 tic de codeuse=>untic = 40*PI/1024
 //40*PI/1024 = 0.12271846303
+const double coeffGLong = 0.12271846303;
 const double coeffDLong = 0.12271846303;
 
 //Constantes permettant la transformation tic / degrés
-const double coeffGAngl = 0.10;
-const double coeffDAngl = 0.10;
+//ecart codeuses 220mm => 360deg = 220pi mm =>360deg = 220pi/0.122718... tc/360deg => redivise par 360=>
+const double coeffGAngl = 15.64445248;
+const double coeffDAngl = 15.64445248;
 
 
 
@@ -96,7 +97,7 @@ void assert()
   comptD = codeuseDroite;
   comptG = codeuseGauche;
 
-Serial.println(codeuseGauche);
+
 
 
   // supprimer mvt parasite/vibratipons
@@ -112,7 +113,7 @@ Serial.println(codeuseGauche);
 
 
 
-  //dAngl = 0; //ATTENTION, A VIRER
+  dAngl = 0; //ATTENTION, A VIRER
 
 
 
@@ -128,13 +129,17 @@ Serial.println(codeuseGauche);
 	//On calcule l'angle entre le robot et la cible
 	consigneOrientation = signe * acos((xC-xR)/((xC-xR)*(xC-xR)*(yC-yR)*(yC-yR)));
 
-//  resetCodeuse();
+  //resetCodeuse();
   deplaceRobot();
 
 
 
-// if (dDist != 0)
-// {
+if (dDist != 0)
+{
+      Serial.print("droite ");
+      Serial.println(comptD);
+      Serial.print("gauche ");
+      Serial.println(comptG);
 //   Serial.print("sommeErreur : ");
 //   Serial.println(sommeErreur);
 //   Serial.print("Distance : ");
@@ -150,15 +155,16 @@ Serial.println(codeuseGauche);
 //   Serial.print("Angle : ");
 //   Serial.println(dAngl);
 //   Serial.println("-------------------------------------");
-// }
+}
 
-  Serial.print("XR : ");
-  Serial.println(xR);
-  Serial.print("XY : ");
-  Serial.println(yR);
+  // Serial.print("XR : ");
+  // Serial.println(xR);
+  // Serial.print("XY : ");
+  // Serial.println(yR);
 
 
-
+  resetCodeuse();
+  deplaceRobot();
 
   // unsigned long fin = millis();
   // Serial.println(fin);
@@ -218,11 +224,16 @@ void recupCodeuse()
         content.concat(carlu);
         cardispo = Serial1.available(); //on relit le nombre de caractères dispo
     }
-
+    Serial.println("#################################aaaa");
+    Serial.println(content);
     splitString(content, ';', data);
     codeuseDroite = data[0].toFloat();
     codeuseGauche = data[1].toFloat();
-
+    Serial.print("D");
+    Serial.println(codeuseDroite);
+    Serial.print("G");
+    Serial.println(codeuseGauche);
+    Serial.println("#################################aaaa");
     // Serial.print(codeuseDroite);
     // Serial.print(" ; ");
     // Serial.println(codeuseGauche);

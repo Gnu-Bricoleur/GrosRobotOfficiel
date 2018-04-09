@@ -40,12 +40,14 @@ void loop() {
   if(donneesALire > 0) //si le buffer n'est pas vide
   {
       char choseLue = Serial.read();
+      //Serial.println(choseLue);
+      //Serial.flush();
       if (choseLue == 'R')
       {
         ticksDroit = 0;
         ticksGauche = 0;
       }
-      else
+      else if (choseLue == 'a')
       {
         Serial.print(ticksDroit);
         Serial.print(";");
