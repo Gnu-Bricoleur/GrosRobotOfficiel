@@ -36,7 +36,8 @@ const double coeffDAngl = 15.64445248;
 
 
 
-
+long anciD;
+long anciG;
 
 
 // Déclaration des variables globales
@@ -112,9 +113,11 @@ void assert()
   // unsigned long debut = millis();
 
   recupCodeuse();
-  comptD = codeuseDroite;
-  comptG = codeuseGauche;
 
+  comptD = codeuseDroite - anciD;
+  comptG = codeuseGauche - anciG;
+  anciD = codeuseDroite;
+  anciG = codeuseGauche;
 
 
 
@@ -131,7 +134,7 @@ void assert()
 
 
 
-  dAngl = 0; //ATTENTION, A VIRER
+  // dAngl = 0; //ATTENTION, A VIRER
 
 
 
@@ -154,24 +157,24 @@ void assert()
 
 // if (dDist != 0)
 // {
-//       Serial.print("droite ");
-//       Serial.println(comptD);
-//       Serial.print("gauche ");
-//       Serial.println(comptG);
+      Serial.print("droite ");
+      Serial.println(comptD);
+      Serial.print("gauche ");
+      Serial.println(comptG);
 //   Serial.print("sommeErreur : ");
 //   Serial.println(sommeErreur);
 //   Serial.print("Distance : ");
 //   Serial.println(dDist);
 //   Serial.print("Distance cible: ");
 //   Serial.println(distanceCible);
-//   Serial.print("Angle : ");
-//   Serial.println(dAngl);
-//   Serial.print("XR : ");
-//   Serial.println(xR);
-//   Serial.print("XY : ");
-//   Serial.println(yR);
-//   Serial.print("Angle : ");
-//   Serial.println(dAngl);
+  // Serial.print("Angle : ");
+  // Serial.println(dAngl);
+  Serial.print("XR : ");
+  Serial.println(xR);
+  Serial.print("XY : ");
+  Serial.println(yR);
+  Serial.print("Orientation : ");
+  Serial.println(orientation);
 //   Serial.println("-------------------------------------");
 // }
 

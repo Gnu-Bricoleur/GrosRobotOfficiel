@@ -41,5 +41,6 @@ void loop()
   //moteurDroit(100);
   //moteurGauche(-254);
   assert();
+  delay(100);
 
 }
