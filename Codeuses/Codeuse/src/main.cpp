@@ -1,5 +1,5 @@
 #include "Arduino.h"
-
+#include <EasyTransfer.h>
 
 /*
 Code pour la carte arduino en charge des codeuses
@@ -8,6 +8,17 @@ Code pour la carte arduino en charge des codeuses
 */
 
 //Declarations globales
+EasyTransfer ET;
+
+struct SEND_DATA_STRUCTURE{
+  //put your variable definitions here for the data you want to send
+  //THIS MUST BE EXACTLY THE SAME ON THE OTHER ARDUINO
+  long codeuseDroiteet;
+  long codeuseGaucheet;
+};
+
+//give a name to the group of data
+SEND_DATA_STRUCTURE codeuseset;
 
 
 int codeuseDroite = 2;//Pins sur lesquels la codeuse est branchée
@@ -15,8 +26,8 @@ int codeuseGauche = 3;
 
 
 //Variables globales intermédiaires
-double ticksDroit = 0;
-double ticksGauche = 0;
+long ticksDroit = 0;
+long ticksGauche = 0;
 double X = 0;
 double Y = 0;
 
@@ -32,6 +43,7 @@ void setup() {
   pinMode(5, INPUT_PULLUP);
   attachInterrupt(0, incDroit, RISING);
   attachInterrupt(1, incGauche, RISING);
+  ET.begin(details(codeuseset), &Serial);
 }
 
 void loop() {
@@ -49,9 +61,20 @@ void loop() {
       }
       else if (choseLue == 'a')
       {
-        Serial.print(ticksDroit);
-        Serial.print(";");
-        Serial.println(-ticksGauche);
+        // String truc;
+        // strcpy(truc, ticksDroit.toString());
+        // strcat(truc, ";");
+        // strcat(truc, ticksGauche.toString());
+        // strcat(truc, "!");
+        // Serial.print(ticksDroit);
+        // Serial.print(';');
+        // Serial.print(-ticksGauche);
+        // Serial.println('!');
+        // Serial.print("!234;765!");
+        codeuseset.codeuseDroiteet = ticksDroit;
+        codeuseset.codeuseGaucheet = ticksGauche;
+        ET.sendData();
+
       }
   }
 }

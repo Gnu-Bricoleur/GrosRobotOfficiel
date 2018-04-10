@@ -3,10 +3,25 @@
 #include <Arduino.h>
 #include "asservissement.hpp"
 #include "moteurs.hpp"
+#include <EasyTransfer.h>
 
 
-float codeuseDroite = 0;
-float codeuseGauche = 0;
+EasyTransfer ET;
+
+struct RECEIVE_DATA_STRUCTURE{
+  //put your variable definitions here for the data you want to receive
+  //THIS MUST BE EXACTLY THE SAME ON THE OTHER ARDUINO
+  long codeuseDroiteet;
+  long codeuseGaucheet;
+};
+
+//give a name to the group of data
+RECEIVE_DATA_STRUCTURE codeuseset;
+
+
+
+long codeuseDroite = 0;
+long codeuseGauche = 0;
 
 //Constantes permettant la transformation tic / millimètre
 //40mm de diametere=>40*PImm de distance par 1024 tic de codeuse=>untic = 40*PI/1024
@@ -84,7 +99,10 @@ double ErreurPasAnglePre  =0;
 
 double sommeErreur = 0;
 
-
+void assertInit()
+{
+   ET.begin(details(codeuseset), &Serial1);
+}
 
 
 
@@ -134,12 +152,12 @@ void assert()
 
 
 
-if (dDist != 0)
-{
-      Serial.print("droite ");
-      Serial.println(comptD);
-      Serial.print("gauche ");
-      Serial.println(comptG);
+// if (dDist != 0)
+// {
+//       Serial.print("droite ");
+//       Serial.println(comptD);
+//       Serial.print("gauche ");
+//       Serial.println(comptG);
 //   Serial.print("sommeErreur : ");
 //   Serial.println(sommeErreur);
 //   Serial.print("Distance : ");
@@ -155,7 +173,7 @@ if (dDist != 0)
 //   Serial.print("Angle : ");
 //   Serial.println(dAngl);
 //   Serial.println("-------------------------------------");
-}
+// }
 
   // Serial.print("XR : ");
   // Serial.println(xR);
@@ -163,7 +181,7 @@ if (dDist != 0)
   // Serial.println(yR);
 
 
-  resetCodeuse();
+  //resetCodeuse();
   deplaceRobot();
 
   // unsigned long fin = millis();
@@ -204,43 +222,85 @@ void deplaceRobot()
 
 
 
+
+
+
 void recupCodeuse()
 {
   Serial1.println("a");
-
   String data[10];
   String content = "";
+  char character;
+
+  // if(Serial1.available())
+  // {
+  //   character = Serial1.read();
+  //   if (character == '!')
+  //   {
+  //     while(!(Serial1.available()))
+  //     {}
+  //     character = Serial1.read();
+  //     while(character != '!')
+  //     {
+  //       //Serial.println(character);
+  //       content.concat(character);
+  //       while(!(Serial1.available()))
+  //       {}
+  //       character = Serial1.read();
+  //     }
+  //   }
+  // }
+  //
 
 
 
-  char carlu = 0; //variable contenant le caractère à lire
-    int cardispo = 0; //variable contenant le nombre de caractère disponibles dans le buffer
-    cardispo = Serial1.available();
-  //Serial.println(cardispo);
-    while(cardispo > 0) //tant qu'il y a des caractères à lire
-    {
-        carlu = Serial1.read(); //on lit le caractère
-        //Serial.print(carlu); //puis on le renvoi à l’expéditeur tel quel
-        content.concat(carlu);
-        cardispo = Serial1.available(); //on relit le nombre de caractères dispo
+  // char carlu; //variable contenant le caractère à lire
+  // int cardispo = 0; //variable contenant le nombre de caractère disponibles dans le buffer
+  // cardispo = Serial1.available();
+  // Serial.println(cardispo);
+  // bool fini = true;
+  //   while(cardispo > 0 && fini) //tant qu'il y a des caractères à lire
+  //   {
+  //       carlu = Serial1.read(); //on lit le caractère
+  //       //Serial.print(carlu); //puis on le renvoi à l’expéditeur tel quel
+  //       if (carlu != -1)
+  //       {
+  //         Serial.println(carlu);
+  //           if (carlu == '!')
+  //           {
+  //             fini = false;
+  //           }
+  //           else
+  //           {
+  //             content.concat(carlu);
+  //           }
+  //       }
+  //       cardispo = Serial1.available(); //on relit le nombre de caractères dispo
+  //   }
+    // Serial.println("#################################aaaa");
+    //Serial.println(content);
+
+
+    //
+    // splitString(content, ';', data);
+    // codeuseDroite = data[0].toInt();
+    // codeuseGauche = data[1].toInt();
+
+
+    if(ET.receiveData()){
+        // Serial.println("Go");
+        codeuseDroite = codeuseset.codeuseDroiteet;
+        codeuseGauche = -codeuseset.codeuseGaucheet;
     }
-    Serial.println("#################################aaaa");
-    Serial.println(content);
-    splitString(content, ';', data);
-    codeuseDroite = data[0].toFloat();
-    codeuseGauche = data[1].toFloat();
-    Serial.print("D");
-    Serial.println(codeuseDroite);
-    Serial.print("G");
-    Serial.println(codeuseGauche);
-    Serial.println("#################################aaaa");
-    // Serial.print(codeuseDroite);
-    // Serial.print(" ; ");
-    // Serial.println(codeuseGauche);
 
-
-    //delay(1000);
-
+  //   if (codeuseDroite != 0)
+  //   {
+  //   Serial.print("D : ");
+  //   Serial.println(codeuseDroite);
+  //   Serial.print("G : ");
+  //   Serial.println(codeuseGauche);
+  // }
+    // Serial.println("#################################aaaa");
 }
 
 

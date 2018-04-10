@@ -30,16 +30,16 @@ void setup()
     Serial.println("##################################################################################");
 
     resetCodeuse();
-    FlexiTimer2::set(30, assert); // 500ms period
-    FlexiTimer2::start();
+    // FlexiTimer2::set(100, assert); // 500ms period
+    // FlexiTimer2::start();
     initMoteurs();
-    //assertInit();
+    assertInit();
 }
 
 void loop()
 {
   //moteurDroit(100);
   //moteurGauche(-254);
-
+  assert();
 
 }
