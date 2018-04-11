@@ -31,8 +31,8 @@ const double coeffDLong = 0.12271846303;
 
 //Constantes permettant la transformation tic / degrés
 //ecart codeuses 220mm => 360deg = 220pi mm =>360deg = 220pi/0.122718... tc/360deg => redivise par 360=>
-const double coeffGAngl = 15.64445248;
-const double coeffDAngl = 15.64445248;
+const double coeffGAngl = 0.23560253561/7.2;
+const double coeffDAngl = 0.23560253561/7.2;
 
 
 
@@ -133,8 +133,9 @@ void assert()
 	dAngl = coeffDAngl*comptD - coeffGAngl*comptG;
 
 
+  //Serial.println(dAngl);
 
-  // dAngl = 0; //ATTENTION, A VIRER
+  //dAngl = 0; //ATTENTION, A VIRER
 
 
 
