@@ -18,7 +18,7 @@ struct RECEIVE_DATA_STRUCTURE{
 //give a name to the group of data
 RECEIVE_DATA_STRUCTURE codeuseset;
 
-
+int delais = 0;
 
 long codeuseDroite = 0;
 long codeuseGauche = 0;
@@ -31,8 +31,8 @@ const double coeffDLong = 0.12271846303;
 
 //Constantes permettant la transformation tic / degrés
 //ecart codeuses 220mm => 360deg = 220pi mm =>360deg = 220pi/0.122718... tc/360deg => redivise par 360=>
-const double coeffGAngl = 0.23560253561/7.2;
-const double coeffDAngl = 0.23560253561/7.2;
+const double coeffGAngl = 0.23560253561/7.22;
+const double coeffDAngl = 0.23560253561/7.22;
 
 
 
@@ -131,7 +131,7 @@ void assert()
   //calcul deplacement entre deux mvt codeuses
   dDist = (coeffGLong*comptG + coeffDLong*comptD)/2.;
 	dAngl = coeffDAngl*comptD - coeffGAngl*comptG;
-
+  //dAngl = ((coeffDAngl*comptD - coeffGAngl*coeffGAngl)/220)*(360/(2*PI));
 
   //Serial.println(dAngl);
 
@@ -140,9 +140,10 @@ void assert()
 
 
 	//Actualisation de la position du robot en xy et en orientation
-	xR += dDist*cos(dAngl);
-	yR += dDist*sin(dAngl);
-	orientation += dAngl;
+
+	xR += dDist*cos(dAngl/2);
+	yR += dDist*sin(dAngl/2);
+  orientation += dAngl;
 
 	//On calcule la distance séparant le robot de sa cible
 	distanceCible = sqrt((xC-xR)*(xC-xR)+(yC-yR)*(yC-yR));
@@ -158,10 +159,10 @@ void assert()
 
 // if (dDist != 0)
 // {
-      Serial.print("droite ");
-      Serial.println(comptD);
-      Serial.print("gauche ");
-      Serial.println(comptG);
+      // Serial.print("droite ");
+      // Serial.println(comptD);
+      // Serial.print("gauche ");
+      // Serial.println(comptG);
 //   Serial.print("sommeErreur : ");
 //   Serial.println(sommeErreur);
 //   Serial.print("Distance : ");
@@ -170,12 +171,18 @@ void assert()
 //   Serial.println(distanceCible);
   // Serial.print("Angle : ");
   // Serial.println(dAngl);
+  if (delais == 100)
+  {
   Serial.print("XR : ");
   Serial.println(xR);
   Serial.print("XY : ");
   Serial.println(yR);
   Serial.print("Orientation : ");
   Serial.println(orientation);
+  delais = 0;
+}
+else
+{delais++;}
 //   Serial.println("-------------------------------------");
 // }
 
