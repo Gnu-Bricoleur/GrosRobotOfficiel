@@ -7,6 +7,7 @@
 #include "constantes.hpp"
 #include "branchements.hpp"
 #include "asservissement.hpp"
+#include "positionnement.hpp"
 
 
 /*
@@ -41,5 +42,5 @@ void loop()
   //moteurDroit(100);
   //moteurGauche(-254);
   //assert();
-
+  positionnement();
 }

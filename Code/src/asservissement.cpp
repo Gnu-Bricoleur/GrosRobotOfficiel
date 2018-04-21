@@ -1,4 +1,7 @@
 // inspiration : http://rco.fr.nf/index.php/2016/07/03/deplacement-dun-robot/
+// https://www.cs.princeton.edu/courses/archive/fall11/cos495/COS495-Lecture5-Odometry.pdf
+// https://www.dca.ufrn.br/~adelardo/artigos/ICINCO04a.pdf
+// http://projet.eu.org/pedago/sin/term/6-asservissement_arduino.pdf
 
 #include <Arduino.h>
 #include "asservissement.hpp"
@@ -19,9 +22,13 @@ struct RECEIVE_DATA_STRUCTURE{
 RECEIVE_DATA_STRUCTURE codeuseset;
 
 int delais = 0;
-
+int distanceCibleprec = 0;
 long codeuseDroite = 0;
 long codeuseGauche = 0;
+
+double ecartangle = 0;
+
+bool finduMvt = false;
 
 //Constantes permettant la transformation tic / millimètre
 //40mm de diametere=>40*PImm de distance par 1024 tic de codeuse=>untic = 40*PI/1024
@@ -53,7 +60,7 @@ double xR = 0.;
 double yR = 0.;
 
 //Variables permettant de stocker la position de la cible du robot
-double xC = 20;
+double xC = 0;
 double yC = 0;
 
 //Variables allant contenir les delta position et angle
@@ -74,9 +81,9 @@ double distanceCible = 0.;
 
 
 //Variables parametrant l'asservissement en angle du robot
-double coeffP = 0.5;//0.4;
-double coeffD = 0.0;//0.1;
-double coeffI = 0.0;//0.000001;
+double coeffP = 0.45;//0.4;
+double coeffD = 0.1;//0.1;
+double coeffI = 0.00002;//0.000001;
 
 double coeffProt = 0;
 double coeffDrot = 0;
@@ -119,34 +126,18 @@ void assert()
   anciD = codeuseDroite;
   anciG = codeuseGauche;
 
-
-
-  // supprimer mvt parasite/vibratipons
-  // if ( abs(comptD) < 5 && abs(comptG) < 5)
-  // {
-  //   comptD = 0;
-  //   comptG = 0;
-  // }
-
   //calcul deplacement entre deux mvt codeuses
   dDist = (coeffGLong*comptG + coeffDLong*comptD)/2.;
 	dAngl = coeffDAngl*comptD - coeffGAngl*comptG;
-  //dAngl = ((coeffDAngl*comptD - coeffGAngl*coeffGAngl)/220)*(360/(2*PI));
-
-  //Serial.println(dAngl);
-
-  //dAngl = 0; //ATTENTION, A VIRER
-
 
 
 	//Actualisation de la position du robot en xy et en orientation
-
 	xR += dDist*cos(dAngl/2);
 	yR += dDist*sin(dAngl/2);
   orientation += dAngl;
 
 	//On calcule la distance séparant le robot de sa cible
-	distanceCible = sqrt((xC-xR)*(xC-xR)+(yC-yR)*(yC-yR));
+	distanceCible = xC-xR;
 
 
 	//On calcule l'angle entre le robot et la cible
@@ -173,13 +164,13 @@ void assert()
   // Serial.println(dAngl);
   if (delais == 100)
   {
-  Serial.print("XR : ");
-  Serial.println(xR);
-  Serial.print("XY : ");
-  Serial.println(yR);
-  Serial.print("Orientation : ");
-  Serial.println(orientation);
-  delais = 0;
+  // Serial.print("XR : ");
+  // Serial.println(xC - xR);
+  // Serial.print("XY : ");
+  // Serial.println(yR);
+  // Serial.print("Orientation : ");
+  // Serial.println(orientation);
+  // delais = 0;
 }
 else
 {delais++;}
@@ -205,10 +196,20 @@ else
 
 void deplaceRobot()
 {
-  if (xC-xR > 0)
-  {
-    distanceCible = distanceCible*(-1);
-  }
+  // if (delais == 100)
+  // {
+  //   Serial.println(xC-xR);
+  // }
+  // if (xC-xR > 0.0)
+  // {
+  //         distanceCible = distanceCible*(-1);
+  // //Serial.println("Positive ++++++++++++++++++++++++++++++++++++++");
+  // }
+  // else
+  // {
+  //
+  //   //Serial.println("Negative ----------------------------------------");
+  // }
 
   deltaErreurPasAngle = distanceCible - ErreurPasAnglePre;
   ErreurPasAnglePre = deltaErreurPasAngle;
@@ -219,16 +220,26 @@ void deplaceRobot()
   // {
   //   maxI = 40 * maxI/abs(maxI);
   // }
-	cmdD = distanceCible*coeffP + coeffD*deltaErreurPasAngle + coeffI*sommeErreur;
+	cmdD = (xC-xR)*coeffP + coeffD*deltaErreurPasAngle + coeffI*sommeErreur;
 
 
+
+
+  if(cmdD > 70)
+  {
+    cmdD = 70;
+  }
+  else if(cmdD < -70)
+  {
+    cmdD = -70;
+  }
 	cmdG = cmdD;
+  ecartangle = (codeuseDroite - codeuseGauche)*0.1;
 
+  moteurDroit(-cmdD + ecartangle);
+  moteurGauche(-cmdG - ecartangle);
 
-  moteurDroit(cmdD);
-  moteurGauche(cmdG);
-
-
+  finMvt();
 }
 
 
@@ -352,3 +363,52 @@ void splitString(String message, char separator, String* data) {
      } while(index >=0); // tant qu'il y a bien un séparateur dans la chaine
 
   }
+
+
+
+
+
+
+
+
+
+
+
+void stopRobot()
+{
+  xC = 0;
+  xR = 0;
+  yC = 0;
+  yR = 0;
+  orientation = 0;
+}
+
+void avancerdroit(int distanceAParcourir)
+{
+  xC = distanceAParcourir;
+}
+
+void tourner()
+{
+
+}
+
+void finMvt()
+{
+  static int tempo = 0;
+
+  if (tempo == 100)
+  {
+    tempo = 0;
+    if(abs(distanceCible - distanceCibleprec) < 1)
+    {
+      finduMvt = true;
+      //Serial.println("Fin du mvt");
+    }
+    distanceCibleprec = distanceCible;
+  }
+  else
+  {
+    tempo ++;
+  }
+}
