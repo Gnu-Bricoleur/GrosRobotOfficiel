@@ -4,8 +4,8 @@
 
 
 
-char consignes[] = {'D', 'A','D','A', 'E'};
-int val[] = {       5000, 200,1000, -200 };
+char consignes[] = {'D', 'A','D','A','D', 'T', 'E'};
+int val[] = {       5000, 200,1000, -200, 1000, 90  };
 int etat = 0;
 extern bool finduMvt;
 
@@ -26,6 +26,7 @@ void positionnement()
         avancerdroit(val[etat]);
         break;
       case 'T':
+        tourner(val[etat]);
         break;
       case 'D':
         Serial.print("Debut attente");

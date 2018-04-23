@@ -41,7 +41,7 @@ const double coeffDLong = 0.12271846303;
 const double coeffGAngl = 0.23560253561/7.22;
 const double coeffDAngl = 0.23560253561/7.22;
 
-
+double diffAngle = 0;
 
 long anciD;
 long anciG;
@@ -69,6 +69,7 @@ double dAngl = 0.;
 
 //Variable contenant le cap du robot
 double orientation = 0.;
+double orientationCible = 0;
 
 //Variable contenant l'angle entre le robot et la cible
 double consigneOrientation = 0.;
@@ -85,7 +86,7 @@ double coeffP = 0.45;//0.4;
 double coeffD = 0.1;//0.1;
 double coeffI = 0.00002;//0.000001;
 
-double coeffProt = 0;
+double coeffProt = 1;
 double coeffDrot = 0;
 double coeffIrot = 0;
 
@@ -165,6 +166,13 @@ void deplaceRobot()
 
 	cmdG = cmdD;
   ecartangle = (codeuseDroite - codeuseGauche)*0.1;
+
+  ecartangle = 0;     // ON vire al correection en angle, a voir ....
+
+  diffAngle = orientationCible - orientation;
+
+  cmdD += diffAngle*coeffProt;
+  cmdG -= diffAngle*coeffProt;
 
 if (finduMvt == false)
 {
@@ -256,6 +264,7 @@ void stopRobot()
   xR = 0;
   yC = 0;
   yR = 0;
+  orientationCible = 0;
   orientation = 0;
 }
 
@@ -266,14 +275,16 @@ void avancerdroit(int distanceAParcourir)
   xC = distanceAParcourir;
 }
 
-void tourner()
+void tourner(int angle)
 {
-
+  Serial.print("tourner de ");
+  Serial.println(angle);
+  orientationCible = angle;
 }
 
 void finMvt()
 {
-  if(abs(distanceCible) < 10 && finduMvt == false)
+  if( abs(distanceCible) < 10 && finduMvt == false && abs(diffAngle)<10 )
   {
     finduMvt = true;
     //Serial.println("fin du mouvement");

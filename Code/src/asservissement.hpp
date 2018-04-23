@@ -6,5 +6,5 @@ void deplaceRobot();
 void assertInit();
 void stopRobot();
 void avancerdroit(int distanceAParcourir);
-void tourner();
+void tourner(int angle);
 void finMvt();
