@@ -86,7 +86,7 @@ double coeffP = 0.45;//0.4;
 double coeffD = 0.1;//0.1;
 double coeffI = 0.00002;//0.000001;
 
-double coeffProt = 1;
+double coeffProt = 2;
 double coeffDrot = 0;
 double coeffIrot = 0;
 
