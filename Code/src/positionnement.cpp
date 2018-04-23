@@ -4,8 +4,8 @@
 
 
 
-char consignes[] = {'D', 'A',  'A',  'T',  'A', 'E'};
-int val[] = {       100, 200,  -200, 90 ,  200 };
+char consignes[] = {'D', 'A','D','A', 'E'};
+int val[] = {       5000, 200,1000, -200 };
 int etat = 0;
 extern bool finduMvt;
 
@@ -14,13 +14,12 @@ void positionnement()
 {
   if(finduMvt == true)
   {
+    Serial.println(consignes[etat]);
     finduMvt = false;
-    etat = etat++;
+    etat += 1;
     stopRobot();
-    delay(500);
+    //delay(10000);
   }
-  else
-  {
     switch(consignes[etat])
     {
       case 'A':
@@ -29,11 +28,17 @@ void positionnement()
       case 'T':
         break;
       case 'D':
+        Serial.print("Debut attente");
+        Serial.println(val[etat]);
+        delay(val[etat]);
+        Serial.println("Fin attente");
+        finduMvt = true;
         break;
       case 'E':
         stopRobot();
         while(1);
+        Serial.println("Fin du match");
         break;
-    }
+
   }
 }

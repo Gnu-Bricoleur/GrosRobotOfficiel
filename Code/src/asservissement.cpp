@@ -116,9 +116,6 @@ void assertInit()
 
 void assert()
 {
-  // Pour tests frequence
-  // unsigned long debut = millis();
-
   recupCodeuse();
 
   comptD = codeuseDroite - anciD;
@@ -143,87 +140,19 @@ void assert()
 	//On calcule l'angle entre le robot et la cible
 	consigneOrientation = signe * acos((xC-xR)/((xC-xR)*(xC-xR)*(yC-yR)*(yC-yR)));
 
-  //resetCodeuse();
   deplaceRobot();
-
-
-
-// if (dDist != 0)
-// {
-      // Serial.print("droite ");
-      // Serial.println(comptD);
-      // Serial.print("gauche ");
-      // Serial.println(comptG);
-//   Serial.print("sommeErreur : ");
-//   Serial.println(sommeErreur);
-//   Serial.print("Distance : ");
-//   Serial.println(dDist);
-//   Serial.print("Distance cible: ");
-//   Serial.println(distanceCible);
-  // Serial.print("Angle : ");
-  // Serial.println(dAngl);
-  if (delais == 100)
-  {
-  // Serial.print("XR : ");
-  // Serial.println(xC - xR);
-  // Serial.print("XY : ");
-  // Serial.println(yR);
-  // Serial.print("Orientation : ");
-  // Serial.println(orientation);
-  // delais = 0;
-}
-else
-{delais++;}
-//   Serial.println("-------------------------------------");
-// }
-
-  // Serial.print("XR : ");
-  // Serial.println(xR);
-  // Serial.print("XY : ");
-  // Serial.println(yR);
-
-
-  //resetCodeuse();
-  deplaceRobot();
-
-  // unsigned long fin = millis();
-  // Serial.println(fin);
-  // Serial.println(debut);
-  // Serial.println("#################");
 
 }
 
 
 void deplaceRobot()
 {
-  // if (delais == 100)
-  // {
-  //   Serial.println(xC-xR);
-  // }
-  // if (xC-xR > 0.0)
-  // {
-  //         distanceCible = distanceCible*(-1);
-  // //Serial.println("Positive ++++++++++++++++++++++++++++++++++++++");
-  // }
-  // else
-  // {
-  //
-  //   //Serial.println("Negative ----------------------------------------");
-  // }
 
   deltaErreurPasAngle = distanceCible - ErreurPasAnglePre;
   ErreurPasAnglePre = deltaErreurPasAngle;
   sommeErreur += distanceCible;
-	//On détermine les commandes à envoyer aux moteurs
-  // double maxI = coeffI*sommeErreur;
-  // if (abs(maxI)>40)
-  // {
-  //   maxI = 40 * maxI/abs(maxI);
-  // }
+
 	cmdD = (xC-xR)*coeffP + coeffD*deltaErreurPasAngle + coeffI*sommeErreur;
-
-
-
 
   if(cmdD > 70)
   {
@@ -233,11 +162,21 @@ void deplaceRobot()
   {
     cmdD = -70;
   }
+
 	cmdG = cmdD;
   ecartangle = (codeuseDroite - codeuseGauche)*0.1;
 
+if (finduMvt == false)
+{
   moteurDroit(-cmdD + ecartangle);
   moteurGauche(-cmdG - ecartangle);
+}
+else
+{
+  moteurDroit(0);
+  moteurGauche(0);
+}
+
 
   finMvt();
 }
@@ -254,75 +193,12 @@ void recupCodeuse()
   String content = "";
   char character;
 
-  // if(Serial1.available())
-  // {
-  //   character = Serial1.read();
-  //   if (character == '!')
-  //   {
-  //     while(!(Serial1.available()))
-  //     {}
-  //     character = Serial1.read();
-  //     while(character != '!')
-  //     {
-  //       //Serial.println(character);
-  //       content.concat(character);
-  //       while(!(Serial1.available()))
-  //       {}
-  //       character = Serial1.read();
-  //     }
-  //   }
-  // }
-  //
-
-
-
-  // char carlu; //variable contenant le caractère à lire
-  // int cardispo = 0; //variable contenant le nombre de caractère disponibles dans le buffer
-  // cardispo = Serial1.available();
-  // Serial.println(cardispo);
-  // bool fini = true;
-  //   while(cardispo > 0 && fini) //tant qu'il y a des caractères à lire
-  //   {
-  //       carlu = Serial1.read(); //on lit le caractère
-  //       //Serial.print(carlu); //puis on le renvoi à l’expéditeur tel quel
-  //       if (carlu != -1)
-  //       {
-  //         Serial.println(carlu);
-  //           if (carlu == '!')
-  //           {
-  //             fini = false;
-  //           }
-  //           else
-  //           {
-  //             content.concat(carlu);
-  //           }
-  //       }
-  //       cardispo = Serial1.available(); //on relit le nombre de caractères dispo
-  //   }
-    // Serial.println("#################################aaaa");
-    //Serial.println(content);
-
-
-    //
-    // splitString(content, ';', data);
-    // codeuseDroite = data[0].toInt();
-    // codeuseGauche = data[1].toInt();
-
 
     if(ET.receiveData()){
         // Serial.println("Go");
         codeuseDroite = codeuseset.codeuseDroiteet;
         codeuseGauche = -codeuseset.codeuseGaucheet;
     }
-
-  //   if (codeuseDroite != 0)
-  //   {
-  //   Serial.print("D : ");
-  //   Serial.println(codeuseDroite);
-  //   Serial.print("G : ");
-  //   Serial.println(codeuseGauche);
-  // }
-    // Serial.println("#################################aaaa");
 }
 
 
@@ -385,6 +261,8 @@ void stopRobot()
 
 void avancerdroit(int distanceAParcourir)
 {
+  Serial.print("Avancer de ");
+  Serial.println(distanceAParcourir);
   xC = distanceAParcourir;
 }
 
@@ -395,20 +273,9 @@ void tourner()
 
 void finMvt()
 {
-  static int tempo = 0;
-
-  if (tempo == 100)
+  if(abs(distanceCible) < 10 && finduMvt == false)
   {
-    tempo = 0;
-    if(abs(distanceCible - distanceCibleprec) < 1)
-    {
-      finduMvt = true;
-      //Serial.println("Fin du mvt");
-    }
-    distanceCibleprec = distanceCible;
-  }
-  else
-  {
-    tempo ++;
+    finduMvt = true;
+    //Serial.println("fin du mouvement");
   }
 }
