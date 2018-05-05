@@ -4,19 +4,19 @@
 
 
 
-char consignes[] = {'D', 'A','D','A','D', 'T', 'E'};
-int val[] = {       5000, 200,1000, -200, 1000, 90  };
+char consignes[] = {'A', 'A','D','A','D', 'T', 'E'};
+int val[] = {       100, 100,10000, -200, 1000, 90  };
 int etat = 0;
 extern bool finduMvt;
 
 
 void positionnement()
 {
-  if(finduMvt == true)
+  if(finduMvt == true)                          //ATTENTION POUR LE PASSAGE D4EATA DESACTIVE POUR L4INSTANT
   {
     Serial.println(consignes[etat]);
     finduMvt = false;
-    etat += 1;
+    //etat += 1;
     stopRobot();
     //delay(10000);
   }

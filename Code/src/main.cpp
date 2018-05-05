@@ -29,18 +29,20 @@ void setup()
     Serial.println("                           .   (O_o_o_o_o_O)     /");
     Serial.println("                            '''''''''''''''''''''    ");
     Serial.println("##################################################################################");
+
     assertInit();
     resetCodeuse();
-    FlexiTimer2::set(5, assert); // 500ms period
+    FlexiTimer2::set(50, assert); // 500ms period
     FlexiTimer2::start();
     initMoteurs();
+
 
 }
 
 void loop()
 {
-  //moteurDroit(100);
+  //moteurGauche(100);
   //moteurGauche(-254);
   //assert();
-  positionnement();
+  //positionnement();
 }

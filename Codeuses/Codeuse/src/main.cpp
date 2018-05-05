@@ -77,6 +77,8 @@ void loop() {
 
       }
   }
+  // Serial.println(ticksDroit);
+  // Serial.println(ticksGauche);
 }
 
 

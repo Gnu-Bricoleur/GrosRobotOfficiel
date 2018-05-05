@@ -60,7 +60,7 @@ double xR = 0.;
 double yR = 0.;
 
 //Variables permettant de stocker la position de la cible du robot
-double xC = 0;
+double xC = 400;
 double yC = 0;
 
 //Variables allant contenir les delta position et angle
@@ -82,11 +82,11 @@ double distanceCible = 0.;
 
 
 //Variables parametrant l'asservissement en angle du robot
-double coeffP = 0.45;//0.4;
-double coeffD = 0.1;//0.1;
-double coeffI = 0.00002;//0.000001;
+double coeffP = 0.1;//0.4;
+double coeffD = 0.0;//0.1;
+double coeffI = 0.0;//0.000001;
 
-double coeffProt = 2;
+double coeffProt = 1;
 double coeffDrot = 0;
 double coeffIrot = 0;
 
@@ -117,8 +117,15 @@ void assertInit()
 
 void assert()
 {
+  // Serial.println("###");
+  // Serial.println(millis());
+  //On recupere la valeur des codeuses
   recupCodeuse();
+  //On inverse le signe pour une question de cohernce avec le sens du robot
+  codeuseDroite = -codeuseDroite;
+  codeuseGauche = -codeuseGauche;
 
+  //On calcul le deplacement effectué pendant la periode de l'assert
   comptD = codeuseDroite - anciD;
   comptG = codeuseGauche - anciG;
   anciD = codeuseDroite;
@@ -137,14 +144,21 @@ void assert()
 	//On calcule la distance séparant le robot de sa cible
 	distanceCible = xC-xR;
 
-
 	//On calcule l'angle entre le robot et la cible
 	consigneOrientation = signe * acos((xC-xR)/((xC-xR)*(xC-xR)*(yC-yR)*(yC-yR)));
 
   deplaceRobot();
 
+  // Serial.println(millis());
+  // //
+  Serial.println("#################");
+  Serial.println(orientation);
+  Serial.println(xR);
+  // Serial.println(finduMvt);
+  // Serial.println(distanceCible);
+  // Serial.println(cmdG);
+  //Serial.println("#################");
 }
-
 
 void deplaceRobot()
 {
@@ -155,17 +169,17 @@ void deplaceRobot()
 
 	cmdD = (xC-xR)*coeffP + coeffD*deltaErreurPasAngle + coeffI*sommeErreur;
 
-  if(cmdD > 70)
+  if(cmdD > 50)
   {
-    cmdD = 70;
+    cmdD = 50;
   }
-  else if(cmdD < -70)
+  else if(cmdD < -50)
   {
-    cmdD = -70;
+    cmdD = -50;
   }
 
 	cmdG = cmdD;
-  ecartangle = (codeuseDroite - codeuseGauche)*0.1;
+  ecartangle = (codeuseDroite - codeuseGauche)*1;
 
   ecartangle = 0;     // ON vire al correection en angle, a voir ....
 
@@ -174,10 +188,12 @@ void deplaceRobot()
   cmdD += diffAngle*coeffProt;
   cmdG -= diffAngle*coeffProt;
 
+  finMvt();
+
 if (finduMvt == false)
 {
-  moteurDroit(-cmdD + ecartangle);
-  moteurGauche(-cmdG - ecartangle);
+  moteurDroit(cmdD);
+  moteurGauche(cmdG);
 }
 else
 {
@@ -186,7 +202,7 @@ else
 }
 
 
-  finMvt();
+
 }
 
 
@@ -270,23 +286,36 @@ void stopRobot()
 
 void avancerdroit(int distanceAParcourir)
 {
-  Serial.print("Avancer de ");
+  //Serial.print("Avancer de ");
   Serial.println(distanceAParcourir);
   xC = distanceAParcourir;
 }
 
 void tourner(int angle)
 {
-  Serial.print("tourner de ");
+  //Serial.print("tourner de ");
   Serial.println(angle);
   orientationCible = angle;
 }
 
 void finMvt()
 {
+  // static int count = 0;
+  // if( abs(distanceCible) < 10 && finduMvt == false && abs(diffAngle)<10 )
+  // {
+  //   count+=1;
+  // }
+  // if (count == 50)
+  // {
+  //   count = 0;
+  //   finduMvt = true;
+  //   Serial.println("fin du mouvement");
+  // }
+
   if( abs(distanceCible) < 10 && finduMvt == false && abs(diffAngle)<10 )
   {
     finduMvt = true;
-    //Serial.println("fin du mouvement");
+    Serial.println("fin du mouvement");
   }
+
 }
