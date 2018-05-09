@@ -10,6 +10,16 @@
 #define IN_4 6
 
 //Capteur ligne
-#define C_Droite A15
-#define C_Centre A14
-#define C_Gauche A13
+#define C_Droite A0
+#define C_Centre A1
+#define C_Gauche A2
+
+//#define OBSTACLE 3
+
+
+#define TIRETTE 2
+
+
+
+#define INFRA_DROIT A15
+#define INFRA_GAUCHE A14

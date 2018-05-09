@@ -8,3 +8,4 @@ void stopRobot();
 void avancerdroit(int distanceAParcourir);
 void tourner(int angle);
 void finMvt();
+void assertpls();

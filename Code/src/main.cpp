@@ -8,7 +8,10 @@
 #include "branchements.hpp"
 #include "asservissement.hpp"
 #include "positionnement.hpp"
+#include "obstacles.hpp"
+#include "fonctions.hpp"
 
+extern unsigned long duree;
 
 /*
      .--._____,
@@ -32,17 +35,32 @@ void setup()
 
     assertInit();
     resetCodeuse();
-    FlexiTimer2::set(50, assert); // 500ms period
-    FlexiTimer2::start();
+    // FlexiTimer2::set(50, assert); // 500ms period
+    // FlexiTimer2::start();
     initMoteurs();
+    initObstacles();
 
+    //On bloque le demarrage
+    TireLaTirette();
+    Serial.println("Attenzion zest partiii");
+    // moteurGauche(100);
+    // moteurDroit(100);
+    initTemps();
+    //delay(2000);
 
 }
 
 void loop()
 {
-  //moteurGauche(100);
-  //moteurGauche(-254);
-  //assert();
-  //positionnement();
+  Serial.println("Hep !");
+  assertpls();
+  detectobstacle();
+  verifTemps();
+  Serial.println(duree);
+
+  
+  // assert();
+  // positionnement();
+
+
 }

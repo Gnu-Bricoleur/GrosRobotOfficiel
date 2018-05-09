@@ -1,0 +1,2 @@
+void detectobstacle();
+void initObstacles();

@@ -7,11 +7,16 @@
 #include "asservissement.hpp"
 #include "moteurs.hpp"
 #include <EasyTransfer.h>
+#include <CircularBuffer.h>
+
+#define DUREINTEGRATION 30
 
 
+CircularBuffer<int,DUREINTEGRATION> ValI;
 EasyTransfer ET;
 
-struct RECEIVE_DATA_STRUCTURE{
+struct RECEIVE_DATA_STRUCTURE{// FlexiTimer2::set(50, assert); // 500ms period
+    // FlexiTimer2::start();
   //put your variable definitions here for the data you want to receive
   //THIS MUST BE EXACTLY THE SAME ON THE OTHER ARDUINO
   long codeuseDroiteet;
@@ -60,7 +65,7 @@ double xR = 0.;
 double yR = 0.;
 
 //Variables permettant de stocker la position de la cible du robot
-double xC = 400;
+double xC = 0;
 double yC = 0;
 
 //Variables allant contenir les delta position et angle
@@ -83,10 +88,10 @@ double distanceCible = 0.;
 
 //Variables parametrant l'asservissement en angle du robot
 double coeffP = 0.1;//0.4;
-double coeffD = 0.0;//0.1;
-double coeffI = 0.0;//0.000001;
+double coeffD = 0.001;//0.1;
+double coeffI = 0.0000015;//0.000001;
 
-double coeffProt = 1;
+double coeffProt = 2;
 double coeffDrot = 0;
 double coeffIrot = 0;
 
@@ -108,15 +113,52 @@ double ErreurPasAnglePre  =0;
 
 double sommeErreur = 0;
 
+extern bool bavancer;
+extern bool btourner;
+
+
+
+
 void assertInit()
 {
    ET.begin(details(codeuseset), &Serial1);
 }
 
-
+void assertpls()
+{
+  recupCodeuse();
+  codeuseDroite = -codeuseDroite;
+  codeuseGauche = -codeuseGauche;
+  if(codeuseDroite*coeffDLong < 800 && codeuseGauche*coeffGLong < 800)
+  {
+    recupCodeuse();
+    codeuseDroite = -codeuseDroite;
+    codeuseGauche = -codeuseGauche;
+    float angleinstant = codeuseDroite - codeuseGauche;
+    if (angleinstant>5)
+    {
+      angleinstant = 5;
+    }
+    else if(angleinstant < -5)
+    {
+      angleinstant = -5;
+    }
+    //
+    angleinstant = 0;
+    //Serial.println(angleinstant);
+    moteurGauche(35 + angleinstant);
+    moteurDroit(35 - angleinstant);
+  }
+  else
+  {
+    moteurDroit(0);
+    moteurGauche(0);
+  }
+}
 
 void assert()
 {
+  //Serial.println(millis());
   // Serial.println("###");
   // Serial.println(millis());
   //On recupere la valeur des codeuses
@@ -151,11 +193,12 @@ void assert()
 
   // Serial.println(millis());
   // //
-  Serial.println("#################");
-  Serial.println(orientation);
-  Serial.println(xR);
+  // Serial.println("#################");
+  // Serial.println(orientation);
+  // Serial.println(xR);
   // Serial.println(finduMvt);
-  // Serial.println(distanceCible);
+  Serial.print("distance Cible :");
+   Serial.println(distanceCible);
   // Serial.println(cmdG);
   //Serial.println("#################");
 }
@@ -165,7 +208,14 @@ void deplaceRobot()
 
   deltaErreurPasAngle = distanceCible - ErreurPasAnglePre;
   ErreurPasAnglePre = deltaErreurPasAngle;
-  sommeErreur += distanceCible;
+
+  sommeErreur = 0;
+  ValI.push(distanceCible);
+  for(int i = 0; i<DUREINTEGRATION; i++)
+  {
+    sommeErreur += ValI[i];
+  }
+
 
 	cmdD = (xC-xR)*coeffP + coeffD*deltaErreurPasAngle + coeffI*sommeErreur;
 
@@ -179,9 +229,6 @@ void deplaceRobot()
   }
 
 	cmdG = cmdD;
-  ecartangle = (codeuseDroite - codeuseGauche)*1;
-
-  ecartangle = 0;     // ON vire al correection en angle, a voir ....
 
   diffAngle = orientationCible - orientation;
 
@@ -276,6 +323,7 @@ void splitString(String message, char separator, String* data) {
 
 void stopRobot()
 {
+  resetCodeuse();//A Voir
   xC = 0;
   xR = 0;
   yC = 0;
@@ -286,13 +334,49 @@ void stopRobot()
 
 void avancerdroit(int distanceAParcourir)
 {
-  //Serial.print("Avancer de ");
+  Serial.print("Avancer de ");
+  if (distanceAParcourir < 400)
+  {  Serial.println("Hi");
+    coeffP = 0.1;//0.4;
+    coeffD = 0.001;//0.1;
+    coeffI = 0.0000015;//0.000001;
+
+    coeffProt = 2;
+    coeffDrot = 0;
+    coeffIrot = 0;
+  }
+  else if (distanceAParcourir < 800)
+  {
+    coeffP = 0.1;//0.4;
+    coeffD = 0.001;//0.1;
+    coeffI = 0.0000015;//0.000001;
+
+    coeffProt = 2;
+    coeffDrot = 0;
+    coeffIrot = 0;
+  }
+  else
+  {
+    coeffP = 0.1;//0.4;
+    coeffD = 0.001;//0.1;
+    coeffI = 0.0000015;//0.000001;
+
+    coeffProt = 2;
+    coeffDrot = 0;
+    coeffIrot = 0;
+  }
   Serial.println(distanceAParcourir);
   xC = distanceAParcourir;
 }
 
 void tourner(int angle)
 {
+    coeffP = 0.;//0.4;
+    coeffD = 0.;//0.1;
+    coeffI = 0.;//0.000001;
+    coeffProt = 1;
+    coeffDrot = 0;
+    coeffIrot = 0;
   //Serial.print("tourner de ");
   Serial.println(angle);
   orientationCible = angle;
@@ -312,10 +396,12 @@ void finMvt()
   //   Serial.println("fin du mouvement");
   // }
 
-  if( abs(distanceCible) < 10 && finduMvt == false && abs(diffAngle)<10 )
+  if( abs(distanceCible) < 10 && finduMvt == false && abs(diffAngle)<5  )
   {
     finduMvt = true;
+
     Serial.println("fin du mouvement");
+    Serial.println("fin du mouvement################################################################");
   }
 
 }
